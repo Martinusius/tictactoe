@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            
+        }
+    </style>
+
+    <script src="p5.min.js"></script>
+    <script src="../dist/tictactoe.min.js"></script>
+    <script>
+        const boardWidth = 3;
+        const boardHeight = 3;
+        const goal = 3;
+
+        const board = tictactoe().size(boardWidth, boardHeight).goal(goal);
+        
+        let turn = 'X';
+
+
+        board.on('win', (winner) => {
+            setTimeout(() => {
+                alert(`${winner} won!`);
+
+                board.reset();
+                turn = 'X';
+            }, 100);
+        });
+
+        board.on('draw', () => {
+            setTimeout(() => {
+                alert('Draw!');
+
+                board.reset();
+                turn = 'X';
+            }, 100);
+        });
+
+        function setup() {
+            createCanvas(900, 900);
+        }
+
+        const symbolSize = 0.6;
+        const symbolPadStart = (1 - symbolSize) / 2;
+        const symbolPadEnd = 1 - symbolPadStart;
+
+        function draw() {
+            background(255);
+
+            const stepX = width / boardWidth;
+            const stepY = height / boardHeight;
+
+            for(let y = 0; y < boardWidth; y++) {
+                for(let x = 0; x < boardHeight; x++) {
+                    fill(0, 0);
+
+                    strokeWeight(2);
+                    stroke(0);
+
+                    
+
+                    rect(x * stepX, y * stepX, stepX, stepX);
+
+                    fill(0, 0);
+
+                    strokeWeight(5);
+                    if(board.get(x, y) === 'X') {
+                        stroke(100, 200, 200);
+                        line((x + symbolPadStart) * stepX, (y + symbolPadStart) * stepY, (x + symbolPadEnd) * stepX, (y + symbolPadEnd) * stepY);
+                        line((x + symbolPadStart) * stepX, (y + symbolPadEnd) * stepY, (x + symbolPadEnd) * stepX, (y + symbolPadStart) * stepY);
+                    }
+                    else if(board.get(x, y) === 'O') {
+                        
+                        
+                        stroke(200, 100, 100)
+                        ellipse((x + 0.5) * stepX, (y + 0.5) * stepX, stepX * symbolSize, stepY * symbolSize);
+                    }   
+                }
+            }
+        }
+
+        let blockMouse = false;
+
+        function mousePressed() {
+            const stepX = width / boardWidth;
+            const stepY = height / boardHeight;
+
+            const x = Math.floor(mouseX / stepX);
+            const y = Math.floor(mouseY / stepY);
+
+            if(x < 0 || x >= boardWidth || y < 0 || y >= boardHeight)
+                return;
+
+            try {
+                board.move(x, y, turn);
+
+                turn = turn === 'X' ? 'O' : 'X';
+            }
+            catch(error) {
+                alert(error);
+            }
+        }
+        
+
+    </script>
+</body>
+</html>
