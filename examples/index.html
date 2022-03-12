@@ -36,9 +36,11 @@
         const board = tictactoe().size(boardWidth, boardHeight).goal(goal);
         
         let turn = 'X';
-
-
+        
         board.on('win', (winner) => {
+            console.log(board);
+
+
             setTimeout(() => {
                 alert(`${winner} won!`);
 
@@ -90,16 +92,26 @@
                         line((x + symbolPadStart) * stepX, (y + symbolPadEnd) * stepY, (x + symbolPadEnd) * stepX, (y + symbolPadStart) * stepY);
                     }
                     else if(board.get(x, y) === 'O') {
-                        
-                        
                         stroke(200, 100, 100)
                         ellipse((x + 0.5) * stepX, (y + 0.5) * stepX, stepX * symbolSize, stepY * symbolSize);
                     }   
                 }
             }
-        }
 
-        let blockMouse = false;
+            if(board.winner) board.goalPath.forEach(({ x, y }) => {
+                if(board.winner === 'X') {
+                    fill(100, 200, 200, 100);
+                }
+                else if(board.winner === 'O') {
+                    fill(200, 100, 100, 100);
+                }
+
+                //console.log(x, y);
+                noStroke();
+
+                rect(x * stepX, y * stepX, stepX, stepX);
+            });
+        }
 
         function mousePressed() {
             const stepX = width / boardWidth;

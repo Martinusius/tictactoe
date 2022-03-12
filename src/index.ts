@@ -5,43 +5,63 @@ interface TicTacToeEventMap {
     'draw': () => void,
 }
 
+type GoalPath = { x: number, y: number}[];
+
 class TicTacToe {
     private _board: Record<string, string> = {};
     private _bounds: Bounds = { minX: 0, maxX: 2, minY: 0, maxY: 2 };
     
-    private _winCallbacks: ((winner?: string) => void)[] = [];
+    private _winCallbacks: ((winner?: string, goalPath?: GoalPath) => void)[] = [];
     private _drawCallbacks: (() => void)[] = [];
 
     private _goal = 3;
 
     private _fillPosition = { x: 0, y: 0 };
 
-    gameOver: boolean = false;
     boundingBox: Bounds = null;
+
+    gameOver: boolean = false;
+    winner: string | null = null;
+    goalPath: GoalPath | null = null;
+    
 
     constructor() {}
 
     private _checkWinner(x: number, y: number, player: string) {
         const checkLine = (dx: number, dy: number) => {
-            let _x = x, _y = y, count = 0;
+            let _x = x + dx, _y = y + dy;
+
+            const path: GoalPath = [];
 
             while(this._board[`${_x},${_y}`] === player) {
+                path.push({ x: _x, y: _y });
+
                 _x += dx;
                 _y += dy;
-                count++;
             }
 
-            return count;
+            return path;
         }
 
-        const horizontal = checkLine(1, 0) + checkLine(-1, 0) - 1;
-        const vertical = checkLine(0, 1) + checkLine(0, -1) - 1;
-        const diagonal = checkLine(1, 1) + checkLine(-1, -1) - 1;
-        const antiDiagonal = checkLine(1, -1) + checkLine(-1, 1) - 1;
+        const directions = [
+            [...checkLine(1, 0), ...checkLine(-1, 0)],
+            [...checkLine(0, 1), ...checkLine(0, -1)],
+            [...checkLine(1, 1), ...checkLine(-1, -1)],
+            [...checkLine(1, -1), ...checkLine(-1, 1)]
+        ];
 
-        if(Math.max(horizontal, vertical, diagonal, antiDiagonal) >= this._goal) {
+        const goalPath = [{ x, y }];
+
+        directions.forEach(direction => {
+            if(direction.length + 1 >= this._goal)
+            goalPath.push(...direction);
+        });
+
+        if(goalPath.length > 1) {
             this.gameOver = true;
-            this._winCallbacks.forEach(callback => callback(player));
+            this.winner = player;
+            this.goalPath = goalPath;
+            this._winCallbacks.forEach(callback => callback(player, goalPath));
         }
     }
 
@@ -165,6 +185,9 @@ class TicTacToe {
 
     reset() {
         this.gameOver = false;
+        this.winner = null;
+        this.goalPath = null;
+
         this._fillPosition = { x: 0, y: 0 };
         this._board = {};
     }
